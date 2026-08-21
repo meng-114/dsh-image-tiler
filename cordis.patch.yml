@@ -1,0 +1,6 @@
+# dsh-image-tiler bundle patch: inserts the host tool plugin row into the
+# profile roster. Install this directory through the protected plugin flow
+# (plugin_install / dshpm), not by hand-editing the profile.
+- insert:
+    - id: image-tiler
+      name: '@dsh-external/dsh-image-tiler'

@@ -1,0 +1,13 @@
+# Dependencies (installed by pnpm/npm; consumers resolve their own)
+node_modules/
+
+# Local test artifacts
+.test-*/
+tiles/
+*-tiles/
+.test-fix*
+test-*.mjs
+
+# OS noise
+.DS_Store
+Thumbs.db
