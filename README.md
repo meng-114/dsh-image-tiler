@@ -5,7 +5,8 @@
 ## 功能
 
 - 工具：`tile_image`，参数包括 `file_path`、`tile_size`（默认 800）、`overlap`（默认 40px）、`output_dir`（默认 `tiles`）、`format`（png/jpeg/webp）、`label`、`overview_size`、`max_tiles`（默认 64）。
-- 工具：`read_tiles`——按区域按需选片（`center`/`left`/`right`/`top`/`bottom`/`full`，或显式 `r1c2,r2c3`），先看 overview 再只读关心的切片，省 token。
+- 工具：`read_tiles`——按区域按需选片（`center`/`left`/`right`/`top`/`bottom`/`full`，或显式 `r1c2,r2c3`），先看 overview 再只读关心的切片，省 token；**无参数调用时读取用户在可视化工作台中勾选的切片**。
+- **可视化切片工作台**：模型调用 `tile_image` 后，工具卡片变为交互界面——拖动滑块实时预览网格，点"切片"生成切片缩略图网格，勾选要给模型看的切片，确认后模型 `read_tiles` 自动读取选中部分。
 - 输出：每个切片文件（文件名含 `r<c>c<col>` 与 `x/y` 坐标）、一张 `*-overview.*` 缩略图、一份 `manifest.json`。
 - 路径安全：输入与输出都限制在当前会话工作区（`session.header.cwd`）内。
 - 与 `read_image` 配合：先调用 `tile_image`，再用 `read_image` 逐张读取切片。

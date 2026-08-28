@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-08-28T11:44:27.439Z",
+  "manifest": "tiles/manifest.json",
+  "tiles": [
+    {
+      "id": "r1c1",
+      "path": "tiles/wb-1600x1000-r1c1-x0-y0.jpg",
+      "x": 0,
+      "y": 0,
+      "width": 600,
+      "height": 600
+    },
+    {
+      "id": "r1c2",
+      "path": "tiles/wb-1600x1000-r1c2-x560-y0.jpg",
+      "x": 560,
+      "y": 0,
+      "width": 600,
+      "height": 600
+    }
+  ]
+}
