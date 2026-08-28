@@ -3,6 +3,7 @@ node_modules/
 
 # Local test artifacts
 .test-*/
+.test-out/
 tiles/
 *-tiles/
 .test-fix*
