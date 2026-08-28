@@ -12,3 +12,6 @@ test-*.mjs
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Workbench user selection (written into the session workspace)
+selected.json
