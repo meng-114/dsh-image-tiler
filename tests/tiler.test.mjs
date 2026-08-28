@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { mkdir, rm, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import sharp from 'sharp'
-import { tileLayout, tileImage, ensureInside, clampInt, sanitizeName, labelSvg, regionWindow, selectTiles } from '../lib/tiler.js'
+import { tileLayout, tileGrid, tileImage, ensureInside, clampInt, sanitizeName, labelSvg, regionWindow, selectTiles } from '../lib/tiler.js'
 
 const OUT = join(process.cwd(), '.test-out')
 test.beforeEach(async () => {
@@ -199,6 +199,49 @@ test('tileImage: cropEdges false keeps original dimensions', async () => {
   const res = await tileImage(src, { outputDirAbs: join(OUT, 'out'), workspaceRoot: OUT, tileSize: 800, overlap: 0, label: false, cropEdges: false })
   assert.equal(res.source.width, 600)
   assert.equal(res.source.height, 400)
+})
+
+test('tileGrid: even 2x1 split absorbs the remainder', () => {
+  const grid = tileGrid(2000, 1500, 2, 1)
+  assert.equal(grid.cols, 2)
+  assert.equal(grid.rows, 1)
+  assert.equal(grid.tiles.length, 2)
+  const [a, b] = grid.tiles
+  assert.equal(a.x, 0)
+  assert.equal(a.width, 1000)
+  assert.equal(b.x, 1000)
+  assert.equal(b.width, 1000)
+  assert.equal(b.x + b.width, 2000)
+})
+
+test('tileGrid: 2x3 split', () => {
+  const grid = tileGrid(1200, 600, 2, 3)
+  assert.equal(grid.tiles.length, 6)
+  assert.equal(grid.tiles[0].width, 600)
+  assert.equal(grid.tiles[0].height, 200)
+  assert.equal(grid.tiles[5].x, 600)
+  assert.equal(grid.tiles[5].y, 400)
+})
+
+test('tileImage: grid mode slices an even 2x1 grid', async () => {
+  const src = join(OUT, 'grid-1200x600.png')
+  await sharp({ create: { width: 1200, height: 600, channels: 3, background: '#445566' } }).png().toFile(src)
+  const res = await tileImage(src, {
+    outputDirAbs: join(OUT, 'out'),
+    workspaceRoot: OUT,
+    cols: 2,
+    rows: 1,
+    overlap: 0,
+    label: false,
+  })
+  assert.equal(res.count, 2)
+  assert.equal(res.cols, 2)
+  assert.equal(res.rows, 1)
+  assert.equal(res.layoutMode, 'grid')
+  assert.equal(res.tiles[0].width, 600)
+  assert.equal(res.tiles[1].width, 600)
+  const manifest = JSON.parse(await readFile(res.manifest, 'utf8'))
+  assert.equal(manifest.layoutMode, 'grid')
 })
 
 test('tileImage: escape and unsupported input guards', async () => {
