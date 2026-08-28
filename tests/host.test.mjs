@@ -32,7 +32,7 @@ function makeHarness() {
     setCurrent: (next) => { current = next },
     provide: (s) => { provided = s },
     fireWatch: () => { for (const cb of watchers) cb() },
-    firePoll: () => { for (const t of timeouts) t.cb() },
+    firePoll: () => { for (const t of [...timeouts]) t.cb() },
     defs: () => defs,
     tile: () => defs.find((d) => d.name === 'tile_image'),
     readTiles: () => defs.find((d) => d.name === 'read_tiles'),
