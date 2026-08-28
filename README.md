@@ -1,5 +1,7 @@
 # dsh-image-tiler
 
+> 简体中文 | **[English](./README.en.md)**
+
 面向 DeepSeek Harness（DSH）的 host 工具插件：把一张大图切成带坐标标注的 ~800×800 切片，并生成一张全局缩略图与 manifest，供视觉模型逐张读取，避免单张图被整体缩到约 800×800 等效像素而丢失细节。
 
 ## 功能
