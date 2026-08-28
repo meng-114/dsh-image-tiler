@@ -11,7 +11,23 @@
 
 ## 安装
 
-通过受保护的 DSH 插件安装流程（plugin_install 或 dshpm）安装本目录为 bundle 插件；`cordis.patch.yml` 会被合并进 profile roster，安装后重启 Web 一次。
+**方式一（推荐，npm 发布版）**：
+
+```bash
+dsh plugin add @mengli114/dsh-image-tiler
+```
+
+或受保护的流程（plugin_install / dshpm，同插件管理器界面的"社区插件"入口）。
+
+**方式二（本地开发 / GitHub 源）**：
+
+```bash
+dsh plugin --profile web add link:E:/ds_harness/dsh-image-tiler
+# 或从 GitHub 安装
+dsh plugin add github:meng-114/dsh-image-tiler
+```
+
+`cordis.patch.yml` 会被合并进 profile roster，安装后重启 Web 一次。
 
 ## 使用
 

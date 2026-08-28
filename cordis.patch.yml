@@ -3,4 +3,4 @@
 # (plugin_install / dshpm), not by hand-editing the profile.
 - insert:
     - id: image-tiler
-      name: '@dsh-external/dsh-image-tiler'
+      name: '@mengli114/dsh-image-tiler'
