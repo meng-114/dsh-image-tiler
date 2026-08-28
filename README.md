@@ -5,6 +5,7 @@
 ## 功能
 
 - 工具：`tile_image`，参数包括 `file_path`、`tile_size`（默认 800）、`overlap`（默认 40px）、`output_dir`（默认 `tiles`）、`format`（png/jpeg/webp）、`label`、`overview_size`、`max_tiles`（默认 64）。
+- 工具：`read_tiles`——按区域按需选片（`center`/`left`/`right`/`top`/`bottom`/`full`，或显式 `r1c2,r2c3`），先看 overview 再只读关心的切片，省 token。
 - 输出：每个切片文件（文件名含 `r<c>c<col>` 与 `x/y` 坐标）、一张 `*-overview.*` 缩略图、一份 `manifest.json`。
 - 路径安全：输入与输出都限制在当前会话工作区（`session.header.cwd`）内。
 - 与 `read_image` 配合：先调用 `tile_image`，再用 `read_image` 逐张读取切片。

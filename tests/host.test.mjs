@@ -34,6 +34,8 @@ function makeHarness() {
     fireWatch: () => { for (const cb of watchers) cb() },
     firePoll: () => { for (const t of timeouts) t.cb() },
     defs: () => defs,
+    tile: () => defs.find((d) => d.name === 'tile_image'),
+    readTiles: () => defs.find((d) => d.name === 'read_tiles'),
     registered: () => registered,
   }
 }
@@ -41,11 +43,12 @@ function makeHarness() {
 test('tool registers immediately with defaults when settings is absent', () => {
   const h = makeHarness()
   apply(h.ctx)
-  assert.equal(h.defs().length, 1)
-  assert.equal(h.defs()[0].name, 'tile_image')
-  assert.equal(h.defs()[0].timeoutMs, 120000)
+  assert.equal(h.defs().length, 2)
+  assert.equal(h.tile().name, 'tile_image')
+  assert.equal(h.tile().timeoutMs, 120000)
+  assert.equal(h.readTiles().name, 'read_tiles')
   assert.equal(h.registered().length, 0)
-  assert.ok(!h.defs()[0].description.includes('automatically tile'))
+  assert.ok(!h.tile().description.includes('automatically tile'))
 })
 
 test('settings mount late -> poll registers namespace and live description follows', () => {
@@ -59,8 +62,8 @@ test('settings mount late -> poll registers namespace and live description follo
 
   h.setCurrent({ autoTile: true, tileSize: 800, overlap: 40, format: 'png', maxTiles: 64, overviewSize: 1200, label: true, outputDir: 'tiles' })
   h.fireWatch()
-  assert.equal(h.defs().length, 1)
-  assert.ok(h.defs()[0].description.includes('automatically tile'))
+  assert.equal(h.defs().length, 2)
+  assert.ok(h.tile().description.includes('automatically tile'))
 })
 
 test('no duplicate registration after successful mount', () => {
@@ -70,7 +73,7 @@ test('no duplicate registration after successful mount', () => {
   h.firePoll()
   h.firePoll()
   assert.equal(h.registered().length, 1)
-  assert.equal(h.defs().length, 1)
+  assert.equal(h.defs().length, 2)
 })
 
 test('execute rejects a non-image with the format guard', async () => {
@@ -78,7 +81,7 @@ test('execute rejects a non-image with the format guard', async () => {
   apply(h.ctx)
   const exec = { agent: { session: { header: { cwd: process.cwd() } } } }
   await assert.rejects(
-    () => h.defs()[0].execute({ file_path: 'README.md' }, exec),
+    () => h.tile().execute({ file_path: 'README.md' }, exec),
     /unsupported image format/,
   )
 })

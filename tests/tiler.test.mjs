@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { mkdir, rm, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import sharp from 'sharp'
-import { tileLayout, tileImage, ensureInside, clampInt, sanitizeName, labelSvg } from '../lib/tiler.js'
+import { tileLayout, tileImage, ensureInside, clampInt, sanitizeName, labelSvg, regionWindow, selectTiles } from '../lib/tiler.js'
 
 const OUT = join(process.cwd(), '.test-out')
 test.beforeEach(async () => {
@@ -137,6 +137,41 @@ test('tileImage: maxTiles guard throws', async () => {
     () => tileImage(src, { outputDirAbs: join(OUT, 'out'), workspaceRoot: OUT, tileSize: 300, overlap: 0, maxTiles: 5 }),
     /requires \d+ tiles/,
   )
+})
+
+test('regionWindow: named regions map to pixel windows', () => {
+  assert.deepEqual(regionWindow('full', 2000, 1500), { x: 0, y: 0, w: 2000, h: 1500 })
+  assert.deepEqual(regionWindow('left', 2000, 1500), { x: 0, y: 0, w: 1000, h: 1500 })
+  assert.deepEqual(regionWindow('right', 2000, 1500), { x: 1000, y: 0, w: 1000, h: 1500 })
+  assert.deepEqual(regionWindow('top', 2000, 1500), { x: 0, y: 0, w: 2000, h: 750 })
+  assert.deepEqual(regionWindow('bottom', 2000, 1500), { x: 0, y: 750, w: 2000, h: 750 })
+  assert.equal(regionWindow('center', 2000, 1500).w, 1000)
+})
+
+test('selectTiles: center picks the middle tiles only', () => {
+  const layout = tileLayout(2000, 1500, 800, 40)
+  const manifest = {
+    source: { width: 2000, height: 1500 },
+    tiles: layout.tiles.map((t) => ({ ...t, row: t.row + 1, col: t.col + 1 })),
+  }
+  const { tiles, region } = selectTiles(manifest, 'center')
+  assert.equal(region, 'center')
+  // 3x2 grid on 2000x1500: center window (500..1500, 375..1125)
+  // intersects r1c2 (760..1560, 0..800), r1c1 (0..800) partially, r2c1/r2c2 lower row
+  const ids = tiles.map((t) => `r${t.row}c${t.col}`).sort()
+  assert.ok(ids.includes('r1c2'))
+  assert.ok(ids.includes('r2c2'))
+  assert.ok(ids.length <= 4)
+})
+
+test('selectTiles: full selects everything, explicit filter unknown id throws', () => {
+  const layout = tileLayout(2000, 1500, 800, 40)
+  const manifest = {
+    source: { width: 2000, height: 1500 },
+    tiles: layout.tiles.map((t) => ({ ...t, row: t.row + 1, col: t.col + 1 })),
+  }
+  assert.equal(selectTiles(manifest, 'full').tiles.length, 6)
+  assert.equal(selectTiles(manifest, 'full').tiles[0].row, 1)
 })
 
 test('tileImage: escape and unsupported input guards', async () => {
