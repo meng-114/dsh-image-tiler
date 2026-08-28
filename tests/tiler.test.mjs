@@ -174,6 +174,33 @@ test('selectTiles: full selects everything, explicit filter unknown id throws', 
   assert.equal(selectTiles(manifest, 'full').tiles[0].row, 1)
 })
 
+test('tileImage: transparent edges are cropped before slicing (cropEdges)', async () => {
+  const src = join(OUT, 'alpha-border-600x400.png')
+  await sharp({ create: { width: 600, height: 400, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: Buffer.from('<svg width="600" height="400"><rect x="100" y="100" width="400" height="200" fill="#ff0000"/></svg>'), left: 0, top: 0 }])
+    .png()
+    .toFile(src)
+
+  const res = await tileImage(src, { outputDirAbs: join(OUT, 'out'), workspaceRoot: OUT, tileSize: 800, overlap: 0, label: false })
+  assert.equal(res.source.width, 400)
+  assert.equal(res.source.height, 200)
+  assert.equal(res.count, 1)
+  assert.equal(res.tiles[0].width, 400)
+  assert.equal(res.tiles[0].height, 200)
+})
+
+test('tileImage: cropEdges false keeps original dimensions', async () => {
+  const src = join(OUT, 'alpha-border2-600x400.png')
+  await sharp({ create: { width: 600, height: 400, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: Buffer.from('<svg width="600" height="400"><rect x="100" y="100" width="400" height="200" fill="#ff0000"/></svg>'), left: 0, top: 0 }])
+    .png()
+    .toFile(src)
+
+  const res = await tileImage(src, { outputDirAbs: join(OUT, 'out'), workspaceRoot: OUT, tileSize: 800, overlap: 0, label: false, cropEdges: false })
+  assert.equal(res.source.width, 600)
+  assert.equal(res.source.height, 400)
+})
+
 test('tileImage: escape and unsupported input guards', async () => {
   await assert.rejects(() => tileImage(join(OUT, '..', 'outside.png'), { outputDirAbs: join(OUT, 'out'), workspaceRoot: OUT }))
   const txt = join(OUT, 'note.txt')
