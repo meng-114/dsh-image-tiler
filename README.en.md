@@ -65,13 +65,16 @@ read_tiles()                                                        # user's con
 npm install
 npm test        # node:test suite (23 tests: layout math, guards, alpha crop,
                 # grid mode, per-session wiring; CI runs on push/PR)
+npm run bench   # tiling benchmark (3000x2000 -> 12 tiles)
 ```
 
 Requires Node 22.19+ / 24+.
 
+The tiling core decodes the source **once** (raw pixel reuse) and writes tiles with bounded concurrency: a 5000×4000 image slices into 35 tiles in ~0.2s.
+
 ## Limitations
 
-- Input formats: PNG / JPEG / GIF / WebP (GIF = first frame); AVIF/HEIF/TIFF not yet.
+- Input formats: PNG / JPEG / GIF / WebP / AVIF / HEIF / TIFF (GIF = first frame).
 - Up to 600 tiles per run (tool default 64), matching the DeepSeek API ceiling.
 - Outputs land in the session workspace (`tiles/` by default; dropped images stage under `.dsh-imgtiler/`).
 

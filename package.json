@@ -1,14 +1,15 @@
 {
   "name": "@mengli114/dsh-image-tiler",
-  "version": "0.2.0",
-  "description": "DSH agent tool: slice a large image into labeled ~800x800 tiles plus an overview thumbnail, preserving detail for vision models.",
+  "version": "0.2.1",
+  "description": "DSH agent tools: slice a large image into labeled tiles (size or columns x rows) with an overview and a visual workbench; read_tiles selects only what the vision model needs.",
   "type": "module",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
   "main": "lib/index.js",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "bench": "node bench.mjs"
   },
   "exports": {
     ".": "./lib/index.js",
@@ -22,7 +23,6 @@
     },
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-settings"
       ],
       "platform": "web"
