@@ -1,7 +1,7 @@
 {
   "name": "@mengli114/dsh-image-tiler",
-  "version": "0.2.1",
-  "description": "DSH agent tools: slice a large image into labeled tiles (size or columns x rows) with an overview and a visual workbench; read_tiles selects only what the vision model needs.",
+  "version": "0.3.0",
+  "description": "DSH agent tools: slice a large image into labeled tiles (size or columns x rows) with an overview and a visual workbench; read_tiles selects only what the vision model needs — by region, explicit ids, the user's workbench selection, or a named target a vision model grounds on the overview.",
   "type": "module",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
