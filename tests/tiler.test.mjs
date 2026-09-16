@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { mkdir, rm, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import sharp from 'sharp'
-import { tileLayout, tileGrid, tileImage, ensureInside, clampInt, sanitizeName, labelSvg, regionWindow, selectTiles } from '../lib/tiler.js'
+import { tileLayout, tileGrid, tileImage, ensureInside, clampInt, sanitizeName, labelSvg, regionWindow, selectTiles, tilesForBox } from '../lib/tiler.js'
 
 const OUT = join(process.cwd(), '.test-out')
 test.beforeEach(async () => {
@@ -250,4 +250,73 @@ test('tileImage: escape and unsupported input guards', async () => {
   await writeFile(txt, 'not an image at all')
   // real non-image content rejects during decode (format check, not extension)
   await assert.rejects(() => tileImage(txt, { outputDirAbs: join(OUT, 'out'), workspaceRoot: OUT }))
+})
+
+/** A 3x2 @800/40 manifest on 2000x1500, 1-based rows/cols. */
+function boxManifest() {
+  const layout = tileLayout(2000, 1500, 800, 40)
+  return {
+    source: { width: 2000, height: 1500 },
+    tiles: layout.tiles.map((t) => ({ ...t, row: t.row + 1, col: t.col + 1 })),
+  }
+}
+
+/** Assert a pixel window matches within floating-point tolerance. */
+function assertWindowClose(actual, expected) {
+  for (const key of ['x', 'y', 'w', 'h']) {
+    assert.ok(
+      Math.abs(actual[key] - expected[key]) < 1e-6,
+      `${key}: expected ${expected[key]}, got ${actual[key]}`,
+    )
+  }
+}
+
+test('tilesForBox: a normalized box maps back to source pixels', () => {
+  const { window, mode } = tilesForBox(boxManifest(), { x: 0.1, y: 0.2, width: 0.2, height: 0.4 })
+  assert.equal(mode, 'intersect')
+  // Fractions times pixels carry float noise (0.1 + 0.2 = 0.30000000000000004).
+  assertWindowClose(window, { x: 200, y: 300, w: 400, h: 600 })
+})
+
+test('tilesForBox: selects every intersecting tile, in manifest order', () => {
+  const manifest = boxManifest()
+  // x 0.3..0.5 (600..1000) spans the 800 seam between the first two columns.
+  const { tiles, mode } = tilesForBox(manifest, { x: 0.3, y: 0.1, width: 0.2, height: 0.1 })
+  assert.equal(mode, 'intersect')
+  assert.deepEqual(tiles.map((t) => `r${t.row}c${t.col}`), ['r1c1', 'r1c2'])
+})
+
+test('tilesForBox: a full-image box selects every tile', () => {
+  assert.equal(tilesForBox(boxManifest(), { x: 0, y: 0, width: 1, height: 1 }).tiles.length, 6)
+})
+
+test('tilesForBox: a point between tiles falls back to the nearest tile', () => {
+  // Two non-overlapping tiles with a wide gap; the point sits inside the gap.
+  const manifest = {
+    source: { width: 1000, height: 100 },
+    tiles: [
+      { row: 1, col: 1, x: 0, y: 0, width: 100, height: 100 },
+      { row: 1, col: 2, x: 500, y: 0, width: 100, height: 100 },
+    ],
+  }
+  // x = 0.15 -> 150px: 50px from tile 1's right edge, 350px from tile 2.
+  const { tiles, mode } = tilesForBox(manifest, { x: 0.15, y: 0.5, width: 0, height: 0 })
+  assert.equal(mode, 'nearest')
+  assert.deepEqual(tiles.map((t) => `r${t.row}c${t.col}`), ['r1c1'])
+})
+
+test('tilesForBox: a zero-area box inside a tile still selects it', () => {
+  const { tiles, mode } = tilesForBox(boxManifest(), { x: 0.05, y: 0.05, width: 0, height: 0 })
+  assert.equal(mode, 'intersect')
+  assert.deepEqual(tiles.map((t) => `r${t.row}c${t.col}`), ['r1c1'])
+})
+
+test('tilesForBox: out-of-range and inverted boxes are clamped', () => {
+  const { window } = tilesForBox(boxManifest(), { x: 1.5, y: -0.5, width: 2, height: 2 })
+  assert.deepEqual(window, { x: 2000, y: 0, w: 0, h: 1500 })
+})
+
+test('tilesForBox: a manifest without source dimensions throws', () => {
+  assert.throws(() => tilesForBox({ tiles: [] }, { x: 0, y: 0, width: 1, height: 1 }), /missing source dimensions/)
+  assert.throws(() => tilesForBox({ source: { width: 0, height: 0 }, tiles: [] }, { x: 0, y: 0, width: 1, height: 1 }), /missing source dimensions/)
 })
