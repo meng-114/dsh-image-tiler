@@ -34,6 +34,15 @@ dsh plugin --profile web add link:/path/to/dsh-image-tiler
 
 The bundle's `cordis.patch.yml` is merged into the profile roster; **restart Web once** after installing.
 
+## Compatibility
+
+| DSH | Plugin |
+|---|---|
+| **0.1.7 line** (checked against 0.1.7-rc.2) | **0.4.0** — the settings card uses the `plugins.bundle.config` seat plus the `ctx.configForms` service |
+| ≤ 0.1.6 line (old `settings.plugin.item` / `settingsScope`) | 0.3.1 and earlier |
+
+The 0.1.7 line removed both `settings.plugin.item` and `ctx.settingsScope`, so **0.4.0 only runs on the newer DSH**; on an older host it does not error — the settings card simply never appears — which is why `package.json` now declares a `dsh.engines.dsh` floor. Evidence and full history: [CHANGELOG.md](./CHANGELOG.md).
+
 ## Usage
 
 Give the model a large image (drop it in, or pass a workspace path) and it tiles it, or drive the workbench yourself:

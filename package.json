@@ -1,6 +1,6 @@
 {
   "name": "@mengli114/dsh-image-tiler",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "DSH agent tools: slice a large image into labeled tiles (size or columns x rows) with an overview and a visual workbench; read_tiles selects only what the vision model needs — by region, explicit ids, the user's workbench selection, or a named target a vision model grounds on the overview.",
   "type": "module",
   "engines": {
@@ -18,6 +18,9 @@
     "./package.json": "./package.json"
   },
   "dsh": {
+    "engines": {
+      "dsh": ">=0.1.7-rc.1"
+    },
     "bundle": {
       "patch": "./cordis.patch.yml"
     },
@@ -40,6 +43,7 @@
     "cordis.patch.yml",
     "README.md",
     "README.en.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "repository": {

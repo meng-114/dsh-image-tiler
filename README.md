@@ -35,6 +35,15 @@ dsh plugin add github:meng-114/dsh-image-tiler
 
 `cordis.patch.yml` 会被合并进 profile roster，安装后重启 Web 一次。
 
+## 兼容性
+
+| DSH | 本插件 |
+|---|---|
+| **0.1.7 线**（已在 0.1.7-rc.2 上核对） | **0.4.0** —— 设置卡片使用 `plugins.bundle.config` seat + `ctx.configForms` 服务 |
+| ≤ 0.1.6 线（旧 `settings.plugin.item` / `settingsScope`） | 0.3.1 及更早 |
+
+0.1.7 线移除了 `settings.plugin.item` 与 `ctx.settingsScope`，因此 **0.4.0 只能跑在新版 DSH 上**；装到旧版不会报错，只是设置卡片不出现——`package.json` 里已用 `dsh.engines.dsh` 声明下限。逐项证据与变更明细见 [CHANGELOG.md](./CHANGELOG.md)。
+
 ## 使用
 
 让模型调用：
